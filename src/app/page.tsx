@@ -123,7 +123,7 @@ export default function Home() {
           opacity: 0.1,
           animation: "pulsate 7s infinite ease-in-out",
           animationDelay: "2s", // Adds a delay before starting
-          maskImage: "radial-gradient(circle 1000px at center, rgba(0, 0, 0, 1), rgba(0, 0, 0, 0))",
+          maskImage: "radial-gradient(circle 850px at center, rgba(0, 0, 0, 1), rgba(0, 0, 0, 0))",
         }}
       >
         <svg

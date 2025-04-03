@@ -4,8 +4,11 @@ import { useState, useEffect, useRef } from "react";
 import { motion } from "framer-motion";
 
 export default function Home() {
-  // Ball properties
-  const [ballSize, setBallSize] = useState(window.innerWidth < 640 ? 320 : 600);
+  // State for detecting client-side rendering
+  const [isClient, setIsClient] = useState(false);
+
+  // Ball properties (will be set after the component mounts)
+  const [ballSize, setBallSize] = useState(600);
   const speed = 3;
   const lightBgColor = "#E1DFD8";
   const darkBgColor = "#242424";
@@ -25,6 +28,7 @@ export default function Home() {
 
   // Update mode on page load
   useEffect(() => {
+    setIsClient(true); // Ensure we are in the client environment
     const savedMode = localStorage.getItem("theme");
     if (savedMode === "dark") {
       setIsDarkMode(true);
@@ -42,16 +46,20 @@ export default function Home() {
 
   // Detect screen resizing to adjust ball size
   useEffect(() => {
+    if (!isClient) return; // Don't run code before the component mounts
     const handleResize = () => {
       setBallSize(window.innerWidth < 640 ? 320 : 600);
     };
 
+    handleResize(); // Set initial size on mount
     window.addEventListener("resize", handleResize);
     return () => window.removeEventListener("resize", handleResize);
-  }, []);
+  }, [isClient]);
 
   // Animation logic for the bouncing ball
   useEffect(() => {
+    if (!isClient) return;
+
     const animateBall = () => {
       const pos = positionRef.current;
       const dir = directionRef.current;
@@ -86,7 +94,9 @@ export default function Home() {
     };
 
     requestAnimationFrame(animateBall);
-  }, []);
+  }, [isClient]);
+
+  if (!isClient) return null; // Prevent rendering until client-side code is available
 
   return (
     <div
@@ -102,50 +112,49 @@ export default function Home() {
       }}
     >
       {/* Interactive Grid */}
-<div
-  style={{
-    position: "absolute",
-    top: 0,
-    left: 0,
-    width: "100vw",
-    height: "100vh",
-    zIndex: -1,
-    opacity: 0.1,
-    animation: "pulsate 7s infinite ease-in-out",
-    animationDelay: "2s", // Adds a delay before starting
-    maskImage: "radial-gradient(circle 1000px at center, rgba(0, 0, 0, 1), rgba(0, 0, 0, 0))",
-  }}
->
-  <svg
-    width="100%"
-    height="100%"
-    xmlns="http://www.w3.org/2000/svg"
-    className="absolute inset-0 h-full w-full"
-    style={{ position: "absolute", top: 0, left: 0 }}
-  >
-    {Array.from({ length: Math.ceil(window.innerWidth / 75) * Math.ceil(window.innerHeight / 75) }).map((_, index) => {
-      const cols = Math.ceil(window.innerWidth / 75);
-      const x = (index % cols) * 75;
-      const y = Math.floor(index / cols) * 75;
-      return (
-        <rect
-          key={index}
-          x={x}
-          y={y}
-          width = "75"
-          height = "75"
-          fill={hoveredSquare === index ? (isDarkMode ? "#C3C3C3" : "#2400AA") : "transparent"}
-          stroke={isDarkMode ? "#E1DFD8" : "#2400AA"}
-          strokeWidth="0.2"
-          onMouseEnter={() => setHoveredSquare(index)}
-          onMouseLeave={() => setHoveredSquare(null)}
-          style={{ transition: "fill 0.3s ease-in-out" }}
-        />
-      );
-    })}
-  </svg>
-</div>
-
+      <div
+        style={{
+          position: "absolute",
+          top: 0,
+          left: 0,
+          width: "100vw",
+          height: "100vh",
+          zIndex: -1,
+          opacity: 0.1,
+          animation: "pulsate 7s infinite ease-in-out",
+          animationDelay: "2s", // Adds a delay before starting
+          maskImage: "radial-gradient(circle 1000px at center, rgba(0, 0, 0, 1), rgba(0, 0, 0, 0))",
+        }}
+      >
+        <svg
+          width="100%"
+          height="100%"
+          xmlns="http://www.w3.org/2000/svg"
+          className="absolute inset-0 h-full w-full"
+          style={{ position: "absolute", top: 0, left: 0 }}
+        >
+          {Array.from({ length: Math.ceil(window.innerWidth / 75) * Math.ceil(window.innerHeight / 75) }).map((_, index) => {
+            const cols = Math.ceil(window.innerWidth / 75);
+            const x = (index % cols) * 75;
+            const y = Math.floor(index / cols) * 75;
+            return (
+              <rect
+                key={index}
+                x={x}
+                y={y}
+                width="75"
+                height="75"
+                fill={hoveredSquare === index ? (isDarkMode ? "#C3C3C3" : "#2400AA") : "transparent"}
+                stroke={isDarkMode ? "#E1DFD8" : "#2400AA"}
+                strokeWidth="0.2"
+                onMouseEnter={() => setHoveredSquare(index)}
+                onMouseLeave={() => setHoveredSquare(null)}
+                style={{ transition: "fill 0.3s ease-in-out" }}
+              />
+            );
+          })}
+        </svg>
+      </div>
 
       {/* Bouncing Ball */}
       <div
